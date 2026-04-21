@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart QR Bagasi</title>
+
+<style>
+body{
+margin:0;
+padding:0;
+font-family:Arial, sans-serif;
+background:#f2f2f2;
+text-align:center;
+}
+
+.box{
+background:white;
+width:90%;
+max-width:420px;
+margin:70px auto;
+padding:30px;
+border-radius:18px;
+box-shadow:0 6px 18px rgba(0,0,0,0.15);
+}
+
+h1{
+margin-bottom:10px;
+}
+
+p{
+color:#444;
+margin:8px 0;
+}
+
+button,a{
+display:block;
+width:100%;
+padding:15px;
+margin-top:12px;
+border:none;
+border-radius:10px;
+font-size:16px;
+text-decoration:none;
+cursor:pointer;
+box-sizing:border-box;
+}
+
+button{
+background:#007bff;
+color:white;
+}
+
+.callbtn{
+background:#ff9800;
+color:white;
+}
+
+.mapbtn{
+background:#28a745;
+color:white;
+}
+
+#status{
+margin-top:18px;
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h1>📦 Bagasi Dijumpai</h1>
+
+<p><b>Pemilik:</b> Wan Ahnaf</p>
+<p><b>Telefon:</b> 011-39962066</p>
+
+<p>Sila bantu tekan butang di bawah.</p>
+
+<button onclick="lokasi()">📍 Hantar Lokasi</button>
+
+<a href="tel:01XXXXXXXX" class="callbtn">📞 Hubungi Pemilik</a>
+
+<a href="#" id="maplink" target="_blank" class="mapbtn">🗺️ Buka Dalam Google Maps</a>
+
+<p id="status"></p>
+
+</div>
+
+<script>
+function lokasi(){
+
+document.getElementById("status").innerHTML =
+"📍 Sedang ambil lokasi...";
+
+navigator.geolocation.getCurrentPosition(
+
+function(pos){
+
+let lat = pos.coords.latitude;
+let long = pos.coords.longitude;
+
+document.getElementById("maplink").href =
+"https://www.google.com/maps?q=" + lat + "," + long;
+
+fetch("https://script.google.com/macros/s/AKfycbyU8j9_Ncwc6Nu8bqBIM6-9-ibpnNvcxp1SfnXoyRrgwVGWZFsN5_z6vMY_wAql5kJq/exec",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+latitude:lat,
+longitude:long
+})
+
+})
+
+.then(response => response.text())
+
+.then(data => {
+
+document.getElementById("status").innerHTML =
+"✅ Lokasi berjaya dihantar!";
+
+})
+
+.catch(error => {
+
+document.getElementById("status").innerHTML =
+"❌ Gagal hantar ke server.";
+
+});
+
+},
+
+function(error){
+
+if(error.code == 1){
+document.getElementById("status").innerHTML =
+"❌ Lokasi diblock. Sila tekan Allow.";
+}
+
+else if(error.code == 2){
+document.getElementById("status").innerHTML =
+"❌ Lokasi tidak dijumpai.";
+}
+
+else if(error.code == 3){
+document.getElementById("status").innerHTML =
+"❌ Timeout. Cuba lagi.";
+}
+
+else{
+document.getElementById("status").innerHTML =
+"❌ Ralat lokasi.";
+}
+
+},
+
+{
+enableHighAccuracy:true,
+timeout:10000,
+maximumAge:0
+}
+
+);
+
+}
+</script>
+
+</body>
+</html>
